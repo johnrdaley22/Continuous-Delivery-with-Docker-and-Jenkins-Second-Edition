@@ -4,23 +4,22 @@ pipeline {
         stage('Compile') {
             steps {
                 dir('Chapter08/sample1') {
-                    sh 'chmod +x gradlew'
-                    sh './gradlew compileJava'
+                    sh 'bash gradlew compileJava'
                 }
             }
         }
         stage('Unit test') {
             steps {
                 dir('Chapter08/sample1') {
-                    sh './gradlew test'
+                    sh 'bash gradlew test'
                 }
             }
         }
         stage('Code coverage') {
             steps {
                 dir('Chapter08/sample1') {
-                    sh './gradlew jacocoTestReport'
-                    sh './gradlew jacocoTestCoverageVerification'
+                    sh 'bash gradlew jacocoTestReport'
+                    sh 'bash gradlew jacocoTestCoverageVerification'
                 }
             }
         }
