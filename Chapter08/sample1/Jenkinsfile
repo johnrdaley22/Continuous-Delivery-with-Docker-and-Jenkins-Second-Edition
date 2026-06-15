@@ -23,5 +23,23 @@ pipeline {
                 }
             }
         }
+        stage('Checkstyle') {
+            steps {
+                dir('Chapter08/sample1') {
+                    sh 'bash gradlew checkstyleTest'
+                }
+            }
+            post {
+                always {
+                    publishHTML(target: [
+                        reportName: 'jacoco checkstyle',
+                        reportDir: 'Chapter08/sample1/build/reports/checkstyle',
+                        reportFiles: 'test.html',
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
+        }
     }
 }
