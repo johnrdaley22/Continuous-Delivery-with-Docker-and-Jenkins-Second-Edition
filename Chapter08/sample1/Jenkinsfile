@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker-agent'
+    }
+    triggers {
+        pollSCM('* * * * *')
+    }
     stages {
         stage('Compile') {
             steps {
@@ -16,6 +21,9 @@ pipeline {
             }
         }
         stage('Code coverage') {
+            when {
+                changeset '**/*.java'
+            }
             steps {
                 dir('Chapter08/sample1') {
                     sh 'bash gradlew jacocoTestReport'
@@ -24,6 +32,9 @@ pipeline {
             }
         }
         stage('Checkstyle') {
+            when {
+                changeset '**/*.java'
+            }
             steps {
                 dir('Chapter08/sample1') {
                     sh 'bash gradlew checkstyleTest'
@@ -40,6 +51,14 @@ pipeline {
                     ])
                 }
             }
+        }
+    }
+    post {
+        success {
+            echo 'pipeline ran perfectly'
+        }
+        failure {
+            echo 'pipeline failure'
         }
     }
 }
