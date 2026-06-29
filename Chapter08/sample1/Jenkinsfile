@@ -1,29 +1,21 @@
-// Exercise 5 pipeline
 pipeline {
-    agent {
-        label 'docker-agent'
-    }
-    triggers {
-        pollSCM('* * * * *')
-    }
+    agent any
     stages {
-        stage('Compile') {
+        stage('Checkout') {
             steps {
-                dir('Chapter08/sample1') {
-                    sh 'bash gradlew compileJava'
-                }
+                checkout scm
             }
         }
-        stage('Unit test') {
+        stage('Unit Test') {
             steps {
                 dir('Chapter08/sample1') {
                     sh 'bash gradlew test'
                 }
             }
         }
-        stage('Code coverage') {
+        stage('Code Coverage') {
             when {
-                changeset '**/*.java'
+                branch 'main'
             }
             steps {
                 dir('Chapter08/sample1') {
@@ -32,34 +24,26 @@ pipeline {
                 }
             }
         }
-        stage('Checkstyle') {
+        stage('Feature Branch Tests') {
             when {
-                changeset '**/*.java'
+                expression { env.BRANCH_NAME ==~ /.*feature.*/ }
             }
             steps {
+                echo "Feature branch detected: ${env.BRANCH_NAME}"
                 dir('Chapter08/sample1') {
-                    sh 'bash gradlew checkstyleTest'
-                }
-            }
-            post {
-                always {
-                    publishHTML(target: [
-                        reportName: 'jacoco checkstyle',
-                        reportDir: 'Chapter08/sample1/build/reports/checkstyle',
-                        reportFiles: 'test.html',
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true
-                    ])
+                    sh 'bash gradlew test'
                 }
             }
         }
-    }
-    post {
-        success {
-            echo 'pipeline ran perfectly'
-        }
-        failure {
-            echo 'pipeline failure'
+        stage('Validate Branch') {
+            when {
+                expression {
+                    !(env.BRANCH_NAME == 'main' || env.BRANCH_NAME ==~ /.*feature.*/)
+                }
+            }
+            steps {
+                error("Branch '${env.BRANCH_NAME}' is not allowed. Only 'main' and feature branches are permitted.")
+            }
         }
     }
 }
