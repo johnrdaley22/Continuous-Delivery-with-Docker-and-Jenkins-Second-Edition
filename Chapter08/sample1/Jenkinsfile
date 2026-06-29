@@ -15,7 +15,7 @@ pipeline {
         }
         stage('Code Coverage') {
             when {
-                branch 'main'
+                branch 'master'
             }
             steps {
                 dir('Chapter08/sample1') {
@@ -38,11 +38,11 @@ pipeline {
         stage('Validate Branch') {
             when {
                 expression {
-                    !(env.BRANCH_NAME == 'main' || env.BRANCH_NAME ==~ /.*feature.*/)
+                    !(env.BRANCH_NAME == 'master' || env.BRANCH_NAME ==~ /.*feature.*/)
                 }
             }
             steps {
-                error("Branch '${env.BRANCH_NAME}' is not allowed. Only 'main' and feature branches are permitted.")
+                error("Branch '${env.BRANCH_NAME}' is not allowed. Only 'master' and feature branches are permitted.")
             }
         }
     }
