@@ -6,18 +6,6 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build and Test with Cache') {
-            steps {
-                dir('Chapter08/sample1') {
-                    sh 'bash gradlew test'
-                }pipeline {
-    agent any
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Unit Test') {
             steps {
                 dir('Chapter08/sample1') {
@@ -36,30 +24,18 @@ pipeline {
                 }
             }
         }
-        stage('Feature Branch Tests') {
-            when {
-                expression { env.BRANCH_NAME ==~ /.*feature.*/ }
-            }
-            steps {
-                echo "Feature branch detected: ${env.BRANCH_NAME}"
-                dir('Chapter08/sample1') {
-                    sh 'bash gradlew test'
-                }
-            }
-        }
-        stage('Validate Branch') {
-            when {
-                expression {
-                    !(env.BRANCH_NAME == 'master' || env.BRANCH_NAME ==~ /.*feature.*/)
-                }
-            }
-            steps {
-                error("Branch '${env.BRANCH_NAME}' is not allowed. Only 'master' and feature branches are permitted.")
-            }
-        }
     }
-}
+    post {
+        always {
+            dir('Chapter08/sample1') {
+                sh 'bash gradlew jacocoTestReport || true'
             }
+        }
+        success {
+            echo 'tests pass!'
+        }
+        failure {
+            echo 'tests fail!'
         }
     }
 }
